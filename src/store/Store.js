@@ -72,7 +72,17 @@ class Store {
           break;
 
         case PATCH_STATE_TYPE:
-          this.patchState(message.payload);
+          this.patchState(message.payload, message.timeStamp);
+
+          // add this AFTER the time measurement 
+          console.groupCollapsed('patch payload\n\tslice:', message.payload[0].key, "\n\ttime it took in ms: ", Date.now() - message.timeStamp)
+          console.log(JSON.stringify(message.payload,(_, value) => {
+            if (typeof value === "bigint") {
+              return { B_I_G_I_N_T: value.toString() }
+            }
+            return value
+          }))
+          console.groupEnd()
           break;
 
         default:
@@ -113,7 +123,7 @@ class Store {
    * Replaces the state for only the keys in the updated state. Notifies all listeners of state change.
    * @param {object} state the new (partial) redux state
    */
-  patchState(difference) {
+  patchState(difference, timeStamp) {
     this.state = this.patchStrategy(this.state, difference);
     this.listeners.forEach((l) => l());
   }
@@ -150,13 +160,16 @@ class Store {
    */
   dispatch(data) {
     return new Promise((resolve, reject) => {
+      const payload =         {
+        type: DISPATCH_TYPE,
+        portName: this.portName,
+        payload: data
+      }
+
+      console.log("dispatch", payload)
       this.serializedMessageSender(
         this.extensionId,
-        {
-          type: DISPATCH_TYPE,
-          portName: this.portName,
-          payload: data
-        }, null, (resp) => {
+          payload, null, (resp) => {
           if (!resp) {
             const error = this.browserAPI.runtime.lastError;
             const bgErr = new Error(`${backgroundErrPrefix}${error}`);

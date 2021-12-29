@@ -103,6 +103,7 @@ export default (store, {
     let prevState = store.getState();
 
     const patchState = () => {
+      const timeStamp = Date.now()
       const state = store.getState();
       const diff = diffStrategy(prevState, state);
 
@@ -111,6 +112,7 @@ export default (store, {
 
         serializedMessagePoster({
           type: PATCH_STATE_TYPE,
+          timeStamp,
           payload: diff,
         });
       }
