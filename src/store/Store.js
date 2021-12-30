@@ -77,20 +77,26 @@ class Store {
           this.patchState(message.payload, message.timeStamp);
           console.timeEnd('patchState UI blocking: ')
 
-          // add this AFTER the time measurement 
-          console.groupCollapsed(`patch payload
-            action: ${message.action}
-            slice: ${message.payload[0].key}
-            total time [ms]: ${Date.now() - message.backgroundPatchStart}
-            transfer time [ms]: ${transferEnd - message.transferStart}
-            transfer throughput [byte/s]: ${message.transferSize*1000/(transferEnd - message.transferStart)}
-          `)
-          console.log(JSON.stringify(message.payload,(_, value) => {
+
+          const stringifyStart = Date.now()
+          const stringifiedPayload = JSON.stringify(message.payload,(_, value) => {
             if (typeof value === "bigint") {
               return { B_I_G_I_N_T: value.toString() }
             }
             return value
-          }))
+          })
+          const stringifiedPayloadSizeKb = stringifiedPayload.length / 1024
+           const stringifyTimeMs = Date.now() - stringifyStart
+
+          // add this AFTER the time measurement 
+          console.groupCollapsed(`patch payload
+            action: ${message.action}
+            slice: ${message.payload[0].key}
+            total time [ms]: ${Date.now() - stringifyTimeMs - message.backgroundPatchStart}
+            transfer time [ms]: ${transferEnd - message.transferStart - stringifyTimeMs}
+            transfer throughput [kb/s]: ${stringifiedPayloadSizeKb*1000/(transferEnd - stringifyTimeMs - message.transferStart)}
+          `)
+          console.log(stringifiedPayload)
           console.groupEnd()
           break;
 

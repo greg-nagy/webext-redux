@@ -115,7 +115,6 @@ export default (store, {
           type: PATCH_STATE_TYPE,
           backgroundPatchStart,
           transferStart: Date.now(),
-          transferSize: diff.length,
           action: globalThis.lastAction, // this is set in the redux logger middleware
           payload: diff,
         });
