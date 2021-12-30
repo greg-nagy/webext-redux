@@ -103,6 +103,7 @@ export default (store, {
     let prevState = store.getState();
 
     const patchState = () => {
+      console.time('------ patchState BG blocking')
       const timeStamp = Date.now()
       const state = store.getState();
       const diff = diffStrategy(prevState, state);
@@ -116,6 +117,7 @@ export default (store, {
           payload: diff,
         });
       }
+      console.timeEnd('------ patchState BG blocking')
     };
 
     // Send patched state down connected port on every redux store state change

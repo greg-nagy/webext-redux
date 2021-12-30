@@ -72,7 +72,9 @@ class Store {
           break;
 
         case PATCH_STATE_TYPE:
+          console.time('patchState UI blocking: ')
           this.patchState(message.payload, message.timeStamp);
+          console.timeEnd('patchState UI blocking: ')
 
           // add this AFTER the time measurement 
           console.groupCollapsed('patch payload\n\tslice:', message.payload[0].key, "\n\ttime it took in ms: ", Date.now() - message.timeStamp)
