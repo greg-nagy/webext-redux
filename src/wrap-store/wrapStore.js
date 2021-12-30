@@ -114,6 +114,7 @@ export default (store, {
         serializedMessagePoster({
           type: PATCH_STATE_TYPE,
           timeStamp,
+          action: globalThis.lastAction, // this is set in the redux logger middleware
           payload: diff,
         });
       }

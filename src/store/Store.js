@@ -77,7 +77,7 @@ class Store {
           console.timeEnd('patchState UI blocking: ')
 
           // add this AFTER the time measurement 
-          console.groupCollapsed('patch payload\n\tslice:', message.payload[0].key, "\n\ttime it took in ms: ", Date.now() - message.timeStamp)
+          console.groupCollapsed('patch payload\n\taction:', message.action, '\n\tslice:', message.payload[0].key, "\n\ttime it took in ms: ", Date.now() - message.timeStamp)
           console.log(JSON.stringify(message.payload,(_, value) => {
             if (typeof value === "bigint") {
               return { B_I_G_I_N_T: value.toString() }
