@@ -104,7 +104,7 @@ export default (store, {
 
     const patchState = () => {
       console.time('------ patchState BG blocking')
-      const timeStamp = Date.now()
+      const backgroundPatchStart = Date.now()
       const state = store.getState();
       const diff = diffStrategy(prevState, state);
 
@@ -113,7 +113,9 @@ export default (store, {
 
         serializedMessagePoster({
           type: PATCH_STATE_TYPE,
-          timeStamp,
+          backgroundPatchStart,
+          transferStart: Date.now(),
+          transferSize: diff.length,
           action: globalThis.lastAction, // this is set in the redux logger middleware
           payload: diff,
         });

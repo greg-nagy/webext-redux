@@ -72,12 +72,13 @@ class Store {
           break;
 
         case PATCH_STATE_TYPE:
+          const transferEnd = Date.now()
           console.time('patchState UI blocking: ')
           this.patchState(message.payload, message.timeStamp);
           console.timeEnd('patchState UI blocking: ')
 
           // add this AFTER the time measurement 
-          console.groupCollapsed('patch payload\n\taction:', message.action, '\n\tslice:', message.payload[0].key, "\n\ttime it took in ms: ", Date.now() - message.timeStamp)
+          console.groupCollapsed('patch payload\n\taction:', message.action, '\n\tslice:', message.payload[0].key, "\n\ttotal time [ms]: ", Date.now() - message.backgroundPatchStart, "\n\ttransfer time [ms]: ", transferEnd - message.transferStart, "\n\ttransfer throughput [mb/s]: ", (message.transferSize*1024)/((transferEnd - message.transferStart)*1000) )
           console.log(JSON.stringify(message.payload,(_, value) => {
             if (typeof value === "bigint") {
               return { B_I_G_I_N_T: value.toString() }
