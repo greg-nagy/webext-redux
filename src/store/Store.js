@@ -86,18 +86,34 @@ class Store {
             return value
           })
           const stringifiedPayloadSizeKb = stringifiedPayload.length / 1024
-           const stringifyTimeMs = Date.now() - stringifyStart
+          const stringifyTimeMs = Date.now() - stringifyStart
 
-          // add this AFTER the time measurement 
-          console.groupCollapsed(`patch payload
-            action: ${message.action}
+          // add this AFTER the time measurement
+          console.groupCollapsed(`patch payload`);
+          console.log(stringifiedPayload);
+          console.groupEnd();
+          const totalTimeMs =
+            Date.now() - stringifyTimeMs - message.backgroundPatchStart;
+
+          console.log(
+            `%c            
+            last action before send (maybe batch send): ${message.action}
             slice: ${message.payload[0].key}
-            total time [ms]: ${Date.now() - stringifyTimeMs - message.backgroundPatchStart}
-            transfer time [ms]: ${transferEnd - message.transferStart - stringifyTimeMs}
-            transfer throughput [kb/s]: ${stringifiedPayloadSizeKb*1000/(transferEnd - stringifyTimeMs - message.transferStart)}
-          `)
-          console.log(stringifiedPayload)
-          console.groupEnd()
+            total time [ms]: ${totalTimeMs}
+            transfer time [ms]: ${
+              transferEnd - message.transferStart - stringifyTimeMs
+            }
+            transfer size [kb]: ${stringifiedPayloadSizeKb}
+            transfer throughput [kb/s]: ${
+              (stringifiedPayloadSizeKb * 1000) /
+              (transferEnd - stringifyTimeMs - message.transferStart)
+            }`,
+            totalTimeMs > 500
+              ? totalTimeMs < 1000
+                ? "background: #222; color: #bada55"
+                : "background: #222; color: #da6955"
+              : ""
+          );
           break;
 
         default:

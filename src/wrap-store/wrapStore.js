@@ -101,14 +101,18 @@ export default (store, {
     const serializedMessagePoster = withSerializer(serializer)((...args) => port.postMessage(...args));
 
     let prevState = store.getState();
+    const debounceTime = 100;
+    let debounceTimer;
+    let lastActionTime;
+    let firstActionAfterLastSend = null;
 
-    const patchState = () => {
-      console.time('------ patchState BG blocking')
-      const backgroundPatchStart = Date.now()
+    const send = () => {
+      const backgroundPatchStart = Date.now();
       const state = store.getState();
       const diff = diffStrategy(prevState, state);
 
       if (diff.length) {
+        console.log(">> send");
         prevState = state;
 
         serializedMessagePoster({
@@ -118,8 +122,32 @@ export default (store, {
           action: globalThis.lastAction, // this is set in the redux logger middleware
           payload: diff,
         });
+        firstActionAfterLastSend = null;
       }
-      console.timeEnd('------ patchState BG blocking')
+    };    
+
+    const patchState = () => {
+      // console.time('------ patchState BG blocking')
+
+      if (!firstActionAfterLastSend) firstActionAfterLastSend = Date.now();
+
+      console.log(`
+      fired action: ${globalThis.lastAction}
+      ms since first action after last send: ${
+        Date.now() - firstActionAfterLastSend
+      }
+      ms since last action: ${Date.now() - lastActionTime}
+      `);
+      lastActionTime = Date.now();
+
+      if (Date.now() - firstActionAfterLastSend > 500) {
+        clearTimeout(debounceTimer);
+        send();
+      } else {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => send(), debounceTime);
+      }
+      // console.timeEnd('------ patchState BG blocking')
     };
 
     // Send patched state down connected port on every redux store state change
